@@ -1,0 +1,22 @@
+{
+  "name": "Color Ratio Analyzer",
+  "description": "Capture full webpage and analyze color ratios for UI design.",
+  "version": "3.2",
+  "manifest_version": 3,
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

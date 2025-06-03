@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color Ratio Analyzer</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <h3>Color Ratio Analyzer</h3>
+    <button id="startCapture">Start Full Page Capture</button>
+
+    <label for="color1">
+      Color 1:
+      <div class="color-picker-wrapper">
+        <input type="color" id="color1" value="#ff0000" />
+        <span class="color-display"></span>
+      </div>
+    </label>
+
+    <label for="color2">
+      Color 2:
+      <div class="color-picker-wrapper">
+        <input type="color" id="color2" value="#00ff00" />
+        <span class="color-display"></span>
+      </div>
+    </label>
+
+    <label for="color3">
+      Color 3:
+      <div class="color-picker-wrapper">
+        <input type="color" id="color3" value="#0000ff" />
+        <span class="color-display"></span>
+      </div>
+    </label>
+
+    <button id="analyzeColors">Analyze Colors</button>
+    <div id="status"></div>
+    <canvas id="stitchedCanvas"></canvas>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

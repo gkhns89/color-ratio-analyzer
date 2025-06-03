@@ -1,0 +1,120 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  background: #f5f7fa;
+  color: #333;
+  min-width: 320px;
+}
+
+h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+.container {
+  max-width: 350px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+  padding: 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+input[type="color"] {
+  width: 60px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  background: none;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgb(0 0 0 / 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+input[type="color"]:hover,
+input[type="color"]:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgb(0 0 0 / 0.25);
+}
+
+.color-picker-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.color-picker-wrapper input[type="color"] {
+  opacity: 0;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.color-display {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: red;
+  box-shadow: 0 0 5px rgb(0 0 0 / 0.15);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+.color-picker-wrapper input[type="color"]:hover ~ .color-display,
+.color-picker-wrapper input[type="color"]:focus ~ .color-display {
+  box-shadow: 0 0 5px rgb(0 0 0 / 0.25);
+}
+
+button {
+  background-color: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+#status {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+  min-height: 24px;
+}
+
+canvas {
+  margin-top: 15px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+  display: block;
+}
