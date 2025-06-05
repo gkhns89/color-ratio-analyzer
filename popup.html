@@ -1,34 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Color Ratio Analyzer</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
+
 <body>
   <div class="container">
     <h3>Color Ratio Analyzer</h3>
-    
-    <!-- Project Management Section -->
-    <div class="project-section">
-      <h4>Project Management:</h4>
-      <div class="project-controls">
-        <div class="project-input-group">
-          <input type="text" id="projectName" placeholder="Enter project name..." maxlength="30">
-          <button id="saveProject" class="project-btn">Save</button>
-        </div>
-        <div class="project-actions">
-          <select id="projectSelect">
-            <option value="">Select a project...</option>
-          </select>
-          <button id="loadProject" class="project-btn">Load</button>
-          <button id="deleteProject" class="project-btn delete-btn">Delete</button>
-          <button id="exportProject" class="project-btn">Export</button>
-        </div>
-      </div>
-    </div>
-    
+
     <!-- Capture Mode Selection -->
     <div class="capture-mode">
       <label class="mode-label">Capture Mode:</label>
@@ -57,7 +40,7 @@
     <!-- Color Selection Section -->
     <div class="color-selection-section">
       <h4>Select Colors to Analyze:</h4>
-      
+
       <label for="color1" class="color-label">
         <span class="hex-display" id="hex1">#FF0000</span>
         Color 1:
@@ -88,6 +71,25 @@
 
     <button id="analyzeColors">Analyze Color Ratios</button>
     <div id="status"></div>
+
+    <!-- Project Management Section -->
+    <div class="project-section">
+      <h4>Project Management:</h4>
+      <div class="project-controls">
+        <div class="project-input-group">
+          <input type="text" id="projectName" placeholder="Enter project name..." maxlength="30">
+          <button id="saveProject" class="project-btn">Save</button>
+        </div>
+        <div class="project-actions">
+          <select title="Select a project" id="projectSelect">
+            <option value="">Select a project...</option>
+          </select>
+          <button id="loadProject" class="project-btn">Load</button>
+          <button id="deleteProject" class="project-btn delete-btn">Delete</button>
+          <button id="exportProject" class="project-btn">Export</button>
+        </div>
+      </div>
+    </div>
     
     <!-- Results Section -->
     <div class="results-section" id="resultsSection" style="display: none;">
@@ -103,7 +105,7 @@
           </div>
           <div class="chart-percentage" id="chartPercentage1">0%</div>
         </div>
-        
+
         <div class="chart-item">
           <div class="chart-header">
             <span class="chart-color" id="chartColor2"></span>
@@ -114,7 +116,7 @@
           </div>
           <div class="chart-percentage" id="chartPercentage2">0%</div>
         </div>
-        
+
         <div class="chart-item">
           <div class="chart-header">
             <span class="chart-color" id="chartColor3"></span>
@@ -126,7 +128,7 @@
           <div class="chart-percentage" id="chartPercentage3">0%</div>
         </div>
       </div>
-      
+
       <div class="results-summary">
         <div class="summary-item">
           <strong>Total Analyzed Pixels:</strong> <span id="totalPixels">0</span>
@@ -139,10 +141,11 @@
         </div>
       </div>
     </div>
-    
+
     <canvas id="stitchedCanvas"></canvas>
   </div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>
