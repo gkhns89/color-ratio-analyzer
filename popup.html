@@ -72,25 +72,6 @@
     <button id="analyzeColors">Analyze Color Ratios</button>
     <div id="status"></div>
 
-    <!-- Project Management Section -->
-    <div class="project-section">
-      <h4>Project Management:</h4>
-      <div class="project-controls">
-        <div class="project-input-group">
-          <input type="text" id="projectName" placeholder="Enter project name..." maxlength="30">
-          <button id="saveProject" class="project-btn">Save</button>
-        </div>
-        <div class="project-actions">
-          <select title="Select a project" id="projectSelect">
-            <option value="">Select a project...</option>
-          </select>
-          <button id="loadProject" class="project-btn">Load</button>
-          <button id="deleteProject" class="project-btn delete-btn">Delete</button>
-          <button id="exportProject" class="project-btn">Export</button>
-        </div>
-      </div>
-    </div>
-    
     <!-- Results Section -->
     <div class="results-section" id="resultsSection" style="display: none;">
       <h4>Analysis Results:</h4>
@@ -141,7 +122,24 @@
         </div>
       </div>
     </div>
-
+    <!-- Project Management Section -->
+    <div class="project-section">
+      <h4>Project Management:</h4>
+      <div class="project-controls">
+        <div class="project-input-group">
+          <input type="text" id="projectName" placeholder="Enter project name..." maxlength="30">
+          <button id="saveProject" class="project-btn">Save</button>
+        </div>
+        <div class="project-actions">
+          <select title="Select a project" id="projectSelect">
+            <option value="">Select a project...</option>
+          </select>
+          <button id="loadProject" class="project-btn">Load</button>
+          <button id="deleteProject" class="project-btn delete-btn">Delete</button>
+          <button id="exportProject" class="project-btn">Export</button>
+        </div>
+      </div>
+    </div>
     <canvas id="stitchedCanvas"></canvas>
   </div>
 
