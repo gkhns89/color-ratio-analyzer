@@ -10,6 +10,25 @@
   <div class="container">
     <h3>Color Ratio Analyzer</h3>
     
+    <!-- Project Management Section -->
+    <div class="project-section">
+      <h4>Project Management:</h4>
+      <div class="project-controls">
+        <div class="project-input-group">
+          <input type="text" id="projectName" placeholder="Enter project name..." maxlength="30">
+          <button id="saveProject" class="project-btn">Save</button>
+        </div>
+        <div class="project-actions">
+          <select id="projectSelect">
+            <option value="">Select a project...</option>
+          </select>
+          <button id="loadProject" class="project-btn">Load</button>
+          <button id="deleteProject" class="project-btn delete-btn">Delete</button>
+          <button id="exportProject" class="project-btn">Export</button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Capture Mode Selection -->
     <div class="capture-mode">
       <label class="mode-label">Capture Mode:</label>
@@ -69,6 +88,58 @@
 
     <button id="analyzeColors">Analyze Color Ratios</button>
     <div id="status"></div>
+    
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection" style="display: none;">
+      <h4>Analysis Results:</h4>
+      <div class="charts-container">
+        <div class="chart-item">
+          <div class="chart-header">
+            <span class="chart-color" id="chartColor1"></span>
+            <span class="chart-label" id="chartLabel1">Color 1</span>
+          </div>
+          <div class="chart-bar">
+            <div class="chart-fill" id="chartFill1"></div>
+          </div>
+          <div class="chart-percentage" id="chartPercentage1">0%</div>
+        </div>
+        
+        <div class="chart-item">
+          <div class="chart-header">
+            <span class="chart-color" id="chartColor2"></span>
+            <span class="chart-label" id="chartLabel2">Color 2</span>
+          </div>
+          <div class="chart-bar">
+            <div class="chart-fill" id="chartFill2"></div>
+          </div>
+          <div class="chart-percentage" id="chartPercentage2">0%</div>
+        </div>
+        
+        <div class="chart-item">
+          <div class="chart-header">
+            <span class="chart-color" id="chartColor3"></span>
+            <span class="chart-label" id="chartLabel3">Color 3</span>
+          </div>
+          <div class="chart-bar">
+            <div class="chart-fill" id="chartFill3"></div>
+          </div>
+          <div class="chart-percentage" id="chartPercentage3">0%</div>
+        </div>
+      </div>
+      
+      <div class="results-summary">
+        <div class="summary-item">
+          <strong>Total Analyzed Pixels:</strong> <span id="totalPixels">0</span>
+        </div>
+        <div class="summary-item">
+          <strong>Capture Mode:</strong> <span id="captureModeSummary">-</span>
+        </div>
+        <div class="summary-item">
+          <strong>Analysis Date:</strong> <span id="analysisDate">-</span>
+        </div>
+      </div>
+    </div>
+    
     <canvas id="stitchedCanvas"></canvas>
   </div>
 
