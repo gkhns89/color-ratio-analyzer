@@ -1,7 +1,7 @@
 {
   "name": "Color Ratio Analyzer",
   "description": "Capture full webpage and analyze color ratios for UI design with project management.",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "manifest_version": 3,
   "permissions": ["activeTab", "scripting", "tabs", "storage"],
   "action": {
