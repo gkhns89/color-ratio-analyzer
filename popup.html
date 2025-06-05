@@ -10,35 +10,37 @@
   <div class="container">
     <h3>Color Ratio Analyzer</h3>
     
-    <!-- Proje Yönetimi -->
-    <div class="section">
-      <div class="section-title">Project Management</div>
-      
-      <div class="project-controls">
-        <input type="text" id="projectName" placeholder="Project name...">
-        <button id="saveProject" class="small">Save</button>
-      </div>
-      
-      <div class="project-controls" style="margin-top: 8px;">
-        <select id="projectSelect">
-          <option value="">Select project...</option>
-        </select>
-        <button id="loadProject" class="small secondary">Load</button>
-        <button id="deleteProject" class="small danger">Delete</button>
+    <!-- Capture Mode Selection -->
+    <div class="capture-mode">
+      <label class="mode-label">Capture Mode:</label>
+      <div class="toggle-container">
+        <span class="toggle-text">Visible Area</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="captureMode">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-text">Full Page</span>
       </div>
     </div>
 
-    <!-- Yakalama -->
-    <div class="section">
-      <div class="section-title">Capture</div>
-      <button id="startCapture">Start Full Page Capture</button>
+    <button id="startCapture">Start Capture</button>
+
+    <!-- Top Colors Section -->
+    <div class="top-colors-section">
+      <h4>Most Used Colors on Page:</h4>
+      <div class="top-colors-container">
+        <div class="loading-colors" id="loadingColors">Click "Detect Colors" to analyze</div>
+        <div class="top-colors-list" id="topColorsList"></div>
+        <button id="detectColors" class="secondary-button">Detect Colors</button>
+      </div>
     </div>
 
-    <!-- Renk Seçimi -->
-    <div class="section">
-      <div class="section-title">Colors</div>
+    <!-- Color Selection Section -->
+    <div class="color-selection-section">
+      <h4>Select Colors to Analyze:</h4>
       
-      <label for="color1">
+      <label for="color1" class="color-label">
+        <span class="hex-display" id="hex1">#FF0000</span>
         Color 1:
         <div class="color-picker-wrapper">
           <input type="color" id="color1" value="#ff0000" />
@@ -46,7 +48,8 @@
         </div>
       </label>
 
-      <label for="color2">
+      <label for="color2" class="color-label">
+        <span class="hex-display" id="hex2">#00FF00</span>
         Color 2:
         <div class="color-picker-wrapper">
           <input type="color" id="color2" value="#00ff00" />
@@ -54,20 +57,18 @@
         </div>
       </label>
 
-      <label for="color3">
+      <label for="color3" class="color-label">
+        <span class="hex-display" id="hex3">#0000FF</span>
         Color 3:
         <div class="color-picker-wrapper">
           <input type="color" id="color3" value="#0000ff" />
           <span class="color-display"></span>
         </div>
       </label>
-
-      <button id="analyzeColors">Analyze Colors</button>
     </div>
 
-    <!-- Sonuçlar -->
+    <button id="analyzeColors">Analyze Color Ratios</button>
     <div id="status"></div>
-    <div id="results"></div>
     <canvas id="stitchedCanvas"></canvas>
   </div>
 

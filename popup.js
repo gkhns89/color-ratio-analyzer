@@ -1,213 +1,201 @@
-// DOM Elements
 const startButton = document.getElementById("startCapture");
 const analyzeButton = document.getElementById("analyzeColors");
+const detectColorsButton = document.getElementById("detectColors");
 const statusText = document.getElementById("status");
-const resultsDiv = document.getElementById("results");
-const projectNameInput = document.getElementById("projectName");
-const projectSelect = document.getElementById("projectSelect");
-const saveProjectBtn = document.getElementById("saveProject");
-const loadProjectBtn = document.getElementById("loadProject");
-const deleteProjectBtn = document.getElementById("deleteProject");
+const captureModeToggle = document.getElementById("captureMode");
 
-let stitchedCanvas;
-let currentProjectData = null;
+// Hex display elements
+const hex1 = document.getElementById("hex1");
+const hex2 = document.getElementById("hex2");
+const hex3 = document.getElementById("hex3");
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  initializeColorDisplays();
-  loadProjectList();
-});
-
-// ==================== PROJE YÖNETİMİ FONKSİYONLARI ====================
-
-async function saveProject() {
-  const projectName = projectNameInput.value.trim();
-  if (!projectName) {
-    alert('Please enter a project name');
-    return;
-  }
-
-  if (!stitchedCanvas) {
-    alert('Please capture a page first');
-    return;
-  }
-
-  const projectData = {
-    name: projectName,
-    timestamp: Date.now(),
-    colors: {
-      color1: document.getElementById("color1").value,
-      color2: document.getElementById("color2").value,
-      color3: document.getElementById("color3").value
-    },
-    imageData: stitchedCanvas.toDataURL(),
-    results: resultsDiv.textContent || null
-  };
-
-  try {
-    const result = await chrome.storage.local.get(['projects']);
-    const projects = result.projects || {};
-    projects[projectName] = projectData;
-    
-    await chrome.storage.local.set({ projects });
-    
-    statusText.textContent = `Project "${projectName}" saved successfully`;
-    projectNameInput.value = '';
-    loadProjectList();
-  } catch (error) {
-    console.error('Error saving project:', error);
-    statusText.textContent = 'Error saving project';
-  }
-}
-
-async function loadProject() {
-  const selectedProject = projectSelect.value;
-  if (!selectedProject) {
-    alert('Please select a project to load');
-    return;
-  }
-
-  try {
-    const result = await chrome.storage.local.get(['projects']);
-    const projects = result.projects || {};
-    const projectData = projects[selectedProject];
-
-    if (!projectData) {
-      alert('Project not found');
-      return;
-    }
-
-    // Load colors
-    document.getElementById("color1").value = projectData.colors.color1;
-    document.getElementById("color2").value = projectData.colors.color2;
-    document.getElementById("color3").value = projectData.colors.color3;
-    
-    // Update color displays
-    initializeColorDisplays();
-
-    // Load image
-    const img = new Image();
-    img.onload = () => {
-      stitchedCanvas = document.getElementById("stitchedCanvas");
-      const ctx = stitchedCanvas.getContext("2d");
-      
-      stitchedCanvas.width = img.width;
-      stitchedCanvas.height = img.height;
-      
-      ctx.drawImage(img, 0, 0);
-      
-      // Load results if available
-      if (projectData.results) {
-        resultsDiv.textContent = projectData.results;
-        resultsDiv.style.display = 'block';
-      }
-      
-      statusText.textContent = `Project "${selectedProject}" loaded successfully`;
-    };
-    img.src = projectData.imageData;
-
-    currentProjectData = projectData;
-  } catch (error) {
-    console.error('Error loading project:', error);
-    statusText.textContent = 'Error loading project';
-  }
-}
-
-async function deleteProject() {
-  const selectedProject = projectSelect.value;
-  if (!selectedProject) {
-    alert('Please select a project to delete');
-    return;
-  }
-
-  if (!confirm(`Are you sure you want to delete project "${selectedProject}"?`)) {
-    return;
-  }
-
-  try {
-    const result = await chrome.storage.local.get(['projects']);
-    const projects = result.projects || {};
-    
-    delete projects[selectedProject];
-    
-    await chrome.storage.local.set({ projects });
-    
-    statusText.textContent = `Project "${selectedProject}" deleted`;
-    loadProjectList();
-  } catch (error) {
-    console.error('Error deleting project:', error);
-    statusText.textContent = 'Error deleting project';
-  }
-}
-
-async function loadProjectList() {
-  try {
-    const result = await chrome.storage.local.get(['projects']);
-    const projects = result.projects || {};
-    
-    projectSelect.innerHTML = '<option value="">Select project...</option>';
-    
-    Object.keys(projects)
-      .sort((a, b) => projects[b].timestamp - projects[a].timestamp)
-      .forEach(projectName => {
-        const option = document.createElement('option');
-        option.value = projectName;
-        option.textContent = `${projectName} (${new Date(projects[projectName].timestamp).toLocaleDateString()})`;
-        projectSelect.appendChild(option);
-      });
-  } catch (error) {
-    console.error('Error loading project list:', error);
-  }
-}
-
-// ==================== EVENT LISTENERS ====================
-
-// Proje yönetimi event listeners
-saveProjectBtn.addEventListener("click", saveProject);
-loadProjectBtn.addEventListener("click", loadProject);
-deleteProjectBtn.addEventListener("click", deleteProject);
-
-// Mevcut functionality
 startButton.addEventListener("click", async () => {
-  statusText.textContent = 'Capturing...';
-  resultsDiv.style.display = 'none';
+  const isFullPage = captureModeToggle.checked;
+  statusText.textContent = isFullPage ? 'Capturing full page...' : 'Capturing visible area...';
   
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.runtime.sendMessage({ action: 'start_capture' });
 
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: () => {
-      const totalHeight = document.body.scrollHeight;
-      const viewportHeight = window.innerHeight;
+  if (isFullPage) {
+    // Full page capture (existing logic)
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        const totalHeight = document.body.scrollHeight;
+        const viewportHeight = window.innerHeight;
 
-      if (totalHeight <= viewportHeight) {
-        chrome.runtime.sendMessage({ action: 'capture_single' });
-        return;
-      }
-
-      const scrollSteps = Math.ceil(totalHeight / viewportHeight);
-      let currentStep = 0;
-
-      const scrollAndCapture = () => {
-        if (currentStep >= scrollSteps) {
-          chrome.runtime.sendMessage({ action: 'capture_done' });
+        if (totalHeight <= viewportHeight) {
+          chrome.runtime.sendMessage({ action: 'capture_single' });
           return;
         }
 
-        window.scrollTo(0, currentStep * viewportHeight);
-        setTimeout(() => {
-          chrome.runtime.sendMessage({ action: 'capture', step: currentStep });
-          currentStep++;
-          scrollAndCapture();
-        }, 500);
-      };
+        const scrollSteps = Math.ceil(totalHeight / viewportHeight);
+        let currentStep = 0;
 
-      scrollAndCapture();
-    }
-  });
+        const scrollAndCapture = () => {
+          if (currentStep >= scrollSteps) {
+            chrome.runtime.sendMessage({ action: 'capture_done' });
+            return;
+          }
+
+          window.scrollTo(0, currentStep * viewportHeight);
+          setTimeout(() => {
+            chrome.runtime.sendMessage({ action: 'capture', step: currentStep });
+            currentStep++;
+            scrollAndCapture();
+          }, 500);
+        };
+
+        scrollAndCapture();
+      }
+    });
+  } else {
+    // Visible area only capture
+    chrome.runtime.sendMessage({ action: 'capture_single' });
+  }
 });
+
+// Detect most used colors on page
+detectColorsButton.addEventListener("click", async () => {
+  const loadingElement = document.getElementById("loadingColors");
+  const topColorsListElement = document.getElementById("topColorsList");
+  
+  loadingElement.textContent = "Analyzing colors...";
+  topColorsListElement.innerHTML = "";
+  
+  if (!stitchedCanvas) {
+    loadingElement.textContent = "Please capture the page first";
+    return;
+  }
+  
+  const topColors = detectTopColors();
+  displayTopColors(topColors);
+});
+
+function detectTopColors() {
+  const ctx = stitchedCanvas.getContext('2d', { willReadFrequently: true });
+  const { width, height } = stitchedCanvas;
+  const imageData = ctx.getImageData(0, 0, width, height).data;
+  
+  const colorMap = new Map();
+  let totalAnalyzedPixels = 0;
+  
+  // Analyze every pixel for accuracy (same as manual analysis)
+  for (let i = 0; i < imageData.length; i += 4) {
+    const r = imageData[i];
+    const g = imageData[i + 1];
+    const b = imageData[i + 2];
+    const a = imageData[i + 3];
+    
+    // Skip transparent pixels only (same as manual analysis)
+    if (a < 128) {
+      continue;
+    }
+    
+    totalAnalyzedPixels++;
+    
+    // Group similar colors with a tolerance (similar to manual analysis tolerance of 30)
+    const tolerance = 30; // Tolerance for grouping similar colors
+    let matched = false;
+    
+    // Check if this color is similar to any existing color in the map
+    for (let [existingColorKey, count] of colorMap.entries()) {
+      const [existingR, existingG, existingB] = existingColorKey.split(',').map(Number);
+      
+      const colorDistance = Math.sqrt(
+        Math.pow(r - existingR, 2) +
+        Math.pow(g - existingG, 2) +
+        Math.pow(b - existingB, 2)
+      );
+      
+      if (colorDistance <= tolerance) {
+        colorMap.set(existingColorKey, count + 1);
+        matched = true;
+        break;
+      }
+    }
+    
+    // If no similar color found, add as new color
+    if (!matched) {
+      const colorKey = `${r},${g},${b}`;
+      colorMap.set(colorKey, 1);
+    }
+  }
+  
+  // Sort by frequency and get top 3
+  const sortedColors = Array.from(colorMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  
+  return sortedColors.map(([colorKey, count]) => {
+    const [r, g, b] = colorKey.split(',').map(Number);
+    const percentage = ((count / totalAnalyzedPixels) * 100).toFixed(2);
+    const hex = rgbToHex(r, g, b);
+    
+    return {
+      rgb: [r, g, b],
+      hex: hex,
+      percentage: percentage,
+      count: count
+    };
+  });
+}
+
+function displayTopColors(topColors) {
+  const loadingElement = document.getElementById("loadingColors");
+  const topColorsListElement = document.getElementById("topColorsList");
+  
+  if (topColors.length === 0) {
+    loadingElement.textContent = "No significant colors found";
+    return;
+  }
+  
+  loadingElement.style.display = "none";
+  
+  topColors.forEach((color, index) => {
+    const colorItem = document.createElement("div");
+    colorItem.className = "top-color-item";
+    colorItem.innerHTML = `
+      <div class="top-color-preview" style="background-color: ${color.hex}"></div>
+      <div class="top-color-info">
+        <div class="top-color-hex">${color.hex}</div>
+        <div class="top-color-percentage">${color.percentage}% of page</div>
+      </div>
+    `;
+    
+    // Add click handler to select this color
+    colorItem.addEventListener("click", () => {
+      selectColorForAnalysis(color.hex, index);
+    });
+    
+    topColorsListElement.appendChild(colorItem);
+  });
+}
+
+function selectColorForAnalysis(hexColor, suggestedIndex = 0) {
+  // Find the first available color picker or use suggested index
+  const colorInputs = [
+    document.getElementById("color1"),
+    document.getElementById("color2"),
+    document.getElementById("color3")
+  ];
+  
+  const targetIndex = suggestedIndex < colorInputs.length ? suggestedIndex : 0;
+  const targetInput = colorInputs[targetIndex];
+  
+  if (targetInput) {
+    targetInput.value = hexColor;
+    updateHexDisplay(targetInput, hexColor);
+    updateColorDisplay(targetInput);
+    
+    // Visual feedback
+    targetInput.parentElement.style.transform = "scale(1.1)";
+    setTimeout(() => {
+      targetInput.parentElement.style.transform = "scale(1)";
+    }, 200);
+  }
+}
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "stitch" && message.images) {
@@ -215,6 +203,7 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
+let stitchedCanvas;
 function stitchImages(images) {
   const imgElements = [];
   let loadedCount = 0;
@@ -249,12 +238,18 @@ function drawCanvas(images) {
     yOffset += img.naturalHeight;
   });
 
-  statusText.textContent = "Capture complete";
+  const isFullPage = captureModeToggle.checked;
+  statusText.textContent = isFullPage ? "Full page capture complete" : "Visible area capture complete";
+  
+  // Reset top colors section
+  document.getElementById("loadingColors").textContent = "Click 'Detect Colors' to analyze";
+  document.getElementById("loadingColors").style.display = "block";
+  document.getElementById("topColorsList").innerHTML = "";
 }
 
 analyzeButton.addEventListener("click", () => {
   if (!stitchedCanvas) {
-    alert('Please capture a page first');
+    statusText.textContent = "Please capture the page first";
     return;
   }
   
@@ -269,41 +264,37 @@ analyzeButton.addEventListener("click", () => {
   ];
 
   const counts = [0, 0, 0];
-  let total = 0;
+  let totalAnalyzedPixels = 0;
 
   for (let i = 0; i < imageData.length; i += 4) {
-    const r = imageData[i],
-      g = imageData[i + 1],
-      b = imageData[i + 2];
+    const r = imageData[i];
+    const g = imageData[i + 1];
+    const b = imageData[i + 2];
+    const a = imageData[i + 3];
+    
+    // Skip transparent pixels (same as detectTopColors)
+    if (a < 128) {
+      continue;
+    }
+    
+    totalAnalyzedPixels++;
+    
     const index = closestColorIndex([r, g, b], selectedColors);
     if (index !== -1) {
       counts[index]++;
     }
-    total++;
   }
 
   const resultText = counts
-    .map((c, i) => `Color ${i + 1} (${selectedColors[i] ? rgbToHex(selectedColors[i]) : 'N/A'}): ${((c / total) * 100).toFixed(2)}%`)
-    .join('\n');
+    .map((c, i) => {
+      const hex = rgbToHex(selectedColors[i][0], selectedColors[i][1], selectedColors[i][2]);
+      const percentage = ((c / totalAnalyzedPixels) * 100).toFixed(2);
+      return `Color ${i + 1} (${hex}): ${percentage}%`;
+    })
+    .join("\n");
   
-  resultsDiv.textContent = resultText;
-  resultsDiv.style.display = 'block';
-  statusText.textContent = "Analysis complete";
+  alert("Color Analysis Results:\n\n" + resultText);
 });
-
-// ==================== YARDIMCI FONKSİYONLAR ====================
-
-function initializeColorDisplays() {
-  document.querySelectorAll('input[type="color"]').forEach(input => {
-    const display = input.nextElementSibling;
-    if(display) {
-      input.addEventListener('input', () => {
-        display.style.background = input.value;
-      });
-      display.style.background = input.value;
-    }
-  });
-}
 
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -316,15 +307,15 @@ function hexToRgb(hex) {
     : null;
 }
 
-function rgbToHex(rgb) {
-  return "#" + rgb.map(x => {
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map(x => {
     const hex = x.toString(16);
     return hex.length === 1 ? "0" + hex : hex;
-  }).join('');
+  }).join("").toUpperCase();
 }
 
 function closestColorIndex(color, selectedColors) {
-  let minDist = 60; // threshold (tolerans)
+  let minDist = 30; // Same tolerance as detectTopColors for consistency
   let match = -1;
   selectedColors.forEach((c, i) => {
     if (!c) return;
@@ -340,3 +331,34 @@ function closestColorIndex(color, selectedColors) {
   });
   return match;
 }
+
+function updateHexDisplay(input, hexValue) {
+  const inputId = input.id;
+  const hexDisplayId = inputId.replace('color', 'hex');
+  const hexDisplay = document.getElementById(hexDisplayId);
+  if (hexDisplay) {
+    hexDisplay.textContent = hexValue.toUpperCase();
+  }
+}
+
+function updateColorDisplay(input) {
+  const display = input.nextElementSibling;
+  if (display) {
+    display.style.background = input.value;
+  }
+}
+
+// Initialize color displays and hex values
+document.querySelectorAll('input[type="color"]').forEach(input => {
+  const display = input.nextElementSibling;
+  if (display) {
+    input.addEventListener('input', () => {
+      updateColorDisplay(input);
+      updateHexDisplay(input, input.value);
+    });
+    
+    // Initialize on page load
+    updateColorDisplay(input);
+    updateHexDisplay(input, input.value);
+  }
+});
