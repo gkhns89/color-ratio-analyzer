@@ -3,7 +3,8 @@ body {
   padding: 20px;
   background: #f5f7fa;
   color: #333;
-  min-width: 320px;
+  min-width: 350px;
+  max-width: 400px;
 }
 
 h3 {
@@ -14,16 +15,65 @@ h3 {
 }
 
 .container {
-  max-width: 350px;
-  margin: 0 auto;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
-  padding: 30px 30px;
+  padding: 25px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  overflow: hidden;
+  gap: 15px;
+}
+
+.section {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.project-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #0078d7;
+}
+
+select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+}
+
+select:focus {
+  outline: none;
+  border-color: #0078d7;
 }
 
 label {
@@ -53,14 +103,14 @@ input[type="color"]:focus {
 
 .color-picker-wrapper {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
 }
 
 .color-picker-wrapper input[type="color"] {
   opacity: 0;
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   position: absolute;
   top: 0;
   left: 0;
@@ -70,8 +120,8 @@ input[type="color"]:focus {
 }
 
 .color-display {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: red;
   box-shadow: 0 0 5px rgb(0 0 0 / 0.15);
@@ -104,17 +154,52 @@ button:hover {
   background-color: #005fa3;
 }
 
+button.secondary {
+  background-color: #6c757d;
+}
+
+button.secondary:hover {
+  background-color: #545b62;
+}
+
+button.danger {
+  background-color: #dc3545;
+}
+
+button.danger:hover {
+  background-color: #c82333;
+}
+
+button.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
 #status {
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #555;
-  min-height: 24px;
+  min-height: 20px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+#results {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: none;
+  white-space: pre-line;
 }
 
 canvas {
-  margin-top: 15px;
+  margin-top: 10px;
   width: 100%;
-  border-radius: 8px;
+  max-height: 200px;
+  border-radius: 6px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
   display: block;
 }

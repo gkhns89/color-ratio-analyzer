@@ -9,34 +9,65 @@
 <body>
   <div class="container">
     <h3>Color Ratio Analyzer</h3>
-    <button id="startCapture">Start Full Page Capture</button>
-
-    <label for="color1">
-      Color 1:
-      <div class="color-picker-wrapper">
-        <input type="color" id="color1" value="#ff0000" />
-        <span class="color-display"></span>
+    
+    <!-- Proje Yönetimi -->
+    <div class="section">
+      <div class="section-title">Project Management</div>
+      
+      <div class="project-controls">
+        <input type="text" id="projectName" placeholder="Project name...">
+        <button id="saveProject" class="small">Save</button>
       </div>
-    </label>
-
-    <label for="color2">
-      Color 2:
-      <div class="color-picker-wrapper">
-        <input type="color" id="color2" value="#00ff00" />
-        <span class="color-display"></span>
+      
+      <div class="project-controls" style="margin-top: 8px;">
+        <select id="projectSelect">
+          <option value="">Select project...</option>
+        </select>
+        <button id="loadProject" class="small secondary">Load</button>
+        <button id="deleteProject" class="small danger">Delete</button>
       </div>
-    </label>
+    </div>
 
-    <label for="color3">
-      Color 3:
-      <div class="color-picker-wrapper">
-        <input type="color" id="color3" value="#0000ff" />
-        <span class="color-display"></span>
-      </div>
-    </label>
+    <!-- Yakalama -->
+    <div class="section">
+      <div class="section-title">Capture</div>
+      <button id="startCapture">Start Full Page Capture</button>
+    </div>
 
-    <button id="analyzeColors">Analyze Colors</button>
+    <!-- Renk Seçimi -->
+    <div class="section">
+      <div class="section-title">Colors</div>
+      
+      <label for="color1">
+        Color 1:
+        <div class="color-picker-wrapper">
+          <input type="color" id="color1" value="#ff0000" />
+          <span class="color-display"></span>
+        </div>
+      </label>
+
+      <label for="color2">
+        Color 2:
+        <div class="color-picker-wrapper">
+          <input type="color" id="color2" value="#00ff00" />
+          <span class="color-display"></span>
+        </div>
+      </label>
+
+      <label for="color3">
+        Color 3:
+        <div class="color-picker-wrapper">
+          <input type="color" id="color3" value="#0000ff" />
+          <span class="color-display"></span>
+        </div>
+      </label>
+
+      <button id="analyzeColors">Analyze Colors</button>
+    </div>
+
+    <!-- Sonuçlar -->
     <div id="status"></div>
+    <div id="results"></div>
     <canvas id="stitchedCanvas"></canvas>
   </div>
 

@@ -7,14 +7,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === 'capture') {
     chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+      if (chrome.runtime.lastError) {
+        console.error('Capture error:', chrome.runtime.lastError);
+        return;
+      }
       capturedImages.push(dataUrl);
       console.log(`Captured step ${message.step}`);
     });
   }
 
-  // Yeni tek adımlı yakalama
+  // Single step capture (for visible area only or single page)
   if (message.action === 'capture_single') {
     chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+      if (chrome.runtime.lastError) {
+        console.error('Capture error:', chrome.runtime.lastError);
+        return;
+      }
       capturedImages = [dataUrl];
       chrome.runtime.sendMessage({ action: 'stitch', images: capturedImages });
     });
