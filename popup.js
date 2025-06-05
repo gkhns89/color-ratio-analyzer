@@ -4,11 +4,213 @@ const detectColorsButton = document.getElementById("detectColors");
 const statusText = document.getElementById("status");
 const captureModeToggle = document.getElementById("captureMode");
 
+// Project Management Elements
+const projectNameInput = document.getElementById("projectName");
+const projectSelect = document.getElementById("projectSelect");
+const saveProjectBtn = document.getElementById("saveProject");
+const loadProjectBtn = document.getElementById("loadProject");
+const deleteProjectBtn = document.getElementById("deleteProject");
+const exportProjectBtn = document.getElementById("exportProject");
+
 // Hex display elements
 const hex1 = document.getElementById("hex1");
 const hex2 = document.getElementById("hex2");
 const hex3 = document.getElementById("hex3");
 
+// Results elements
+const resultsSection = document.getElementById("resultsSection");
+
+// Initialize project management
+document.addEventListener('DOMContentLoaded', () => {
+  loadProjectsList();
+  initializeColorDisplays();
+});
+
+// Project Management Functions
+async function loadProjectsList() {
+  const result = await chrome.storage.local.get(['colorAnalyzerProjects']);
+  const projects = result.colorAnalyzerProjects || {};
+  
+  projectSelect.innerHTML = '<option value="">Select a project...</option>';
+  
+  Object.keys(projects).forEach(projectName => {
+    const option = document.createElement('option');
+    option.value = projectName;
+    option.textContent = projectName;
+    projectSelect.appendChild(option);
+  });
+}
+
+async function saveCurrentProject() {
+  const projectName = projectNameInput.value.trim();
+  if (!projectName) {
+    alert('Please enter a project name');
+    return;
+  }
+  
+  if (!stitchedCanvas) {
+    alert('Please capture a page first');
+    return;
+  }
+  
+  const projectData = {
+    name: projectName,
+    colors: [
+      document.getElementById("color1").value,
+      document.getElementById("color2").value,
+      document.getElementById("color3").value
+    ],
+    captureMode: captureModeToggle.checked ? 'fullpage' : 'visible',
+    canvasData: stitchedCanvas.toDataURL(),
+    timestamp: new Date().toISOString(),
+    lastAnalysis: getLastAnalysisResults()
+  };
+  
+  const result = await chrome.storage.local.get(['colorAnalyzerProjects']);
+  const projects = result.colorAnalyzerProjects || {};
+  projects[projectName] = projectData;
+  
+  await chrome.storage.local.set({ colorAnalyzerProjects: projects });
+  
+  statusText.textContent = `Project "${projectName}" saved successfully!`;
+  projectNameInput.value = '';
+  loadProjectsList();
+}
+
+async function loadSelectedProject() {
+  const selectedProject = projectSelect.value;
+  if (!selectedProject) {
+    alert('Please select a project to load');
+    return;
+  }
+  
+  const result = await chrome.storage.local.get(['colorAnalyzerProjects']);
+  const projects = result.colorAnalyzerProjects || {};
+  const projectData = projects[selectedProject];
+  
+  if (!projectData) {
+    alert('Project not found');
+    return;
+  }
+  
+  // Load colors
+  document.getElementById("color1").value = projectData.colors[0];
+  document.getElementById("color2").value = projectData.colors[1];
+  document.getElementById("color3").value = projectData.colors[2];
+  
+  // Update displays
+  updateAllColorDisplays();
+  
+  // Load capture mode
+  captureModeToggle.checked = projectData.captureMode === 'fullpage';
+  
+  // Load canvas if available
+  if (projectData.canvasData) {
+    const img = new Image();
+    img.onload = () => {
+      stitchedCanvas = document.getElementById("stitchedCanvas");
+      const ctx = stitchedCanvas.getContext("2d");
+      stitchedCanvas.width = img.width;
+      stitchedCanvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      
+      statusText.textContent = `Project "${selectedProject}" loaded successfully!`;
+      
+      // Load analysis results if available
+      if (projectData.lastAnalysis) {
+        displayAnalysisResults(projectData.lastAnalysis);
+      }
+    };
+    img.src = projectData.canvasData;
+  }
+}
+
+async function deleteSelectedProject() {
+  const selectedProject = projectSelect.value;
+  if (!selectedProject) {
+    alert('Please select a project to delete');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to delete project "${selectedProject}"?`)) {
+    return;
+  }
+  
+  const result = await chrome.storage.local.get(['colorAnalyzerProjects']);
+  const projects = result.colorAnalyzerProjects || {};
+  delete projects[selectedProject];
+  
+  await chrome.storage.local.set({ colorAnalyzerProjects: projects });
+  
+  statusText.textContent = `Project "${selectedProject}" deleted successfully!`;
+  loadProjectsList();
+}
+
+async function exportSelectedProject() {
+  const selectedProject = projectSelect.value;
+  if (!selectedProject) {
+    alert('Please select a project to export');
+    return;
+  }
+  
+  const result = await chrome.storage.local.get(['colorAnalyzerProjects']);
+  const projects = result.colorAnalyzerProjects || {};
+  const projectData = projects[selectedProject];
+  
+  if (!projectData) {
+    alert('Project not found');
+    return;
+  }
+  
+  const exportData = {
+    projectName: selectedProject,
+    exportDate: new Date().toISOString(),
+    data: projectData
+  };
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `color-analyzer-${selectedProject}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  statusText.textContent = `Project "${selectedProject}" exported successfully!`;
+}
+
+function getLastAnalysisResults() {
+  // Get current analysis results if available
+  const chartFill1 = document.getElementById("chartFill1");
+  if (chartFill1 && chartFill1.style.width && chartFill1.style.width !== '0%') {
+    return {
+      color1: {
+        hex: document.getElementById("color1").value,
+        percentage: document.getElementById("chartPercentage1").textContent
+      },
+      color2: {
+        hex: document.getElementById("color2").value,
+        percentage: document.getElementById("chartPercentage2").textContent
+      },
+      color3: {
+        hex: document.getElementById("color3").value,
+        percentage: document.getElementById("chartPercentage3").textContent
+      },
+      totalPixels: document.getElementById("totalPixels").textContent,
+      captureMode: document.getElementById("captureModeSummary").textContent,
+      analysisDate: document.getElementById("analysisDate").textContent
+    };
+  }
+  return null;
+}
+
+// Event Listeners for Project Management
+saveProjectBtn.addEventListener("click", saveCurrentProject);
+loadProjectBtn.addEventListener("click", loadSelectedProject);
+deleteProjectBtn.addEventListener("click", deleteSelectedProject);
+exportProjectBtn.addEventListener("click", exportSelectedProject);
+
+// Original capture functionality
 startButton.addEventListener("click", async () => {
   const isFullPage = captureModeToggle.checked;
   statusText.textContent = isFullPage ? 'Capturing full page...' : 'Capturing visible area...';
@@ -245,13 +447,19 @@ function drawCanvas(images) {
   document.getElementById("loadingColors").textContent = "Click 'Detect Colors' to analyze";
   document.getElementById("loadingColors").style.display = "block";
   document.getElementById("topColorsList").innerHTML = "";
+  
+  // Hide results section until new analysis
+  resultsSection.style.display = "none";
 }
 
+// Updated analyze function with graphical results
 analyzeButton.addEventListener("click", () => {
   if (!stitchedCanvas) {
     statusText.textContent = "Please capture the page first";
     return;
   }
+  
+  statusText.textContent = "Analyzing colors...";
   
   const ctx = stitchedCanvas.getContext('2d', { willReadFrequently: true });
   const { width, height } = stitchedCanvas;
@@ -285,16 +493,60 @@ analyzeButton.addEventListener("click", () => {
     }
   }
 
-  const resultText = counts
-    .map((c, i) => {
-      const hex = rgbToHex(selectedColors[i][0], selectedColors[i][1], selectedColors[i][2]);
-      const percentage = ((c / totalAnalyzedPixels) * 100).toFixed(2);
-      return `Color ${i + 1} (${hex}): ${percentage}%`;
-    })
-    .join("\n");
-  
-  alert("Color Analysis Results:\n\n" + resultText);
+  // Calculate percentages and display results
+  const results = counts.map((count, index) => {
+    const hex = rgbToHex(selectedColors[index][0], selectedColors[index][1], selectedColors[index][2]);
+    const percentage = ((count / totalAnalyzedPixels) * 100).toFixed(2);
+    return {
+      hex: hex,
+      percentage: parseFloat(percentage),
+      count: count
+    };
+  });
+
+  displayAnalysisResults({
+    color1: { hex: results[0].hex, percentage: results[0].percentage + '%' },
+    color2: { hex: results[1].hex, percentage: results[1].percentage + '%' },
+    color3: { hex: results[2].hex, percentage: results[2].percentage + '%' },
+    totalPixels: totalAnalyzedPixels.toLocaleString(),
+    captureMode: captureModeToggle.checked ? 'Full Page' : 'Visible Area',
+    analysisDate: new Date().toLocaleDateString()
+  });
+
+  statusText.textContent = "Analysis complete!";
 });
+
+function displayAnalysisResults(results) {
+  // Update chart colors
+  document.getElementById("chartColor1").style.backgroundColor = results.color1.hex;
+  document.getElementById("chartColor2").style.backgroundColor = results.color2.hex;
+  document.getElementById("chartColor3").style.backgroundColor = results.color3.hex;
+  
+  // Update chart labels
+  document.getElementById("chartLabel1").textContent = `Color 1 (${results.color1.hex})`;
+  document.getElementById("chartLabel2").textContent = `Color 2 (${results.color2.hex})`;
+  document.getElementById("chartLabel3").textContent = `Color 3 (${results.color3.hex})`;
+  
+  // Update percentages
+  document.getElementById("chartPercentage1").textContent = results.color1.percentage;
+  document.getElementById("chartPercentage2").textContent = results.color2.percentage;
+  document.getElementById("chartPercentage3").textContent = results.color3.percentage;
+  
+  // Update chart fills with animation
+  setTimeout(() => {
+    document.getElementById("chartFill1").style.width = results.color1.percentage;
+    document.getElementById("chartFill2").style.width = results.color2.percentage;
+    document.getElementById("chartFill3").style.width = results.color3.percentage;
+  }, 100);
+  
+  // Update summary
+  document.getElementById("totalPixels").textContent = results.totalPixels;
+  document.getElementById("captureModeSummary").textContent = results.captureMode;
+  document.getElementById("analysisDate").textContent = results.analysisDate;
+  
+  // Show results section
+  resultsSection.style.display = "block";
+}
 
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -348,17 +600,26 @@ function updateColorDisplay(input) {
   }
 }
 
-// Initialize color displays and hex values
-document.querySelectorAll('input[type="color"]').forEach(input => {
-  const display = input.nextElementSibling;
-  if (display) {
-    input.addEventListener('input', () => {
-      updateColorDisplay(input);
-      updateHexDisplay(input, input.value);
-    });
-    
-    // Initialize on page load
+function updateAllColorDisplays() {
+  document.querySelectorAll('input[type="color"]').forEach(input => {
     updateColorDisplay(input);
     updateHexDisplay(input, input.value);
-  }
-});
+  });
+}
+
+function initializeColorDisplays() {
+  // Initialize color displays and hex values
+  document.querySelectorAll('input[type="color"]').forEach(input => {
+    const display = input.nextElementSibling;
+    if (display) {
+      input.addEventListener('input', () => {
+        updateColorDisplay(input);
+        updateHexDisplay(input, input.value);
+      });
+      
+      // Initialize on page load
+      updateColorDisplay(input);
+      updateHexDisplay(input, input.value);
+    }
+  });
+}
