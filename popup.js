@@ -53,6 +53,13 @@ async function saveCurrentProject() {
     return;
   }
   
+  // Check if analysis has been performed
+  const analysisResults = getLastAnalysisResults();
+  if (!analysisResults) {
+    alert('Please perform color analysis before saving the project');
+    return;
+  }
+  
   const projectData = {
     name: projectName,
     colors: [
